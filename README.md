@@ -23,11 +23,11 @@ Workweek
  - pause time (minutes)
  - list of workdays
  
- # API endpoints
-POST /events
-GET  /events
- 
-GET /workloads/{year}/{weekOfYear}/{dayOfWeek}
+# API endpoints
+POST /{userId}/events
+GET /{userId}/events
+GET /{userId}/workloads/{year}/{weekOfYear}
+GET /{userId}/status 
 
 # Local Development
 - Create service credentials for AppEngine from Google Cloud Console (JSON) and put it to ${project_root}/backend/workload-service-auth.json
