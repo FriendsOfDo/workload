@@ -25,8 +25,11 @@ Workweek
  
 # API endpoints
 POST /{userId}/events
+
 GET /{userId}/events
+
 GET /{userId}/workloads/{year}/{weekOfYear}
+
 GET /{userId}/status 
 
 # Local Development
