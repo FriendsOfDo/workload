@@ -1,0 +1,1 @@
+docker build -t gcr.io/workload-149313/backend:latest .

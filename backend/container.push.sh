@@ -1,0 +1,1 @@
+gcloud docker -- push gcr.io/workload-149313/backend:latest
