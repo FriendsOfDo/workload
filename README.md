@@ -26,3 +26,9 @@ POST /events
 GET  /events
  
 GET /workloads/{year}/{weekOfYear}/{dayOfWeek}
+
+# Local Development
+- Create service credentials for AppEngine from Google Cloud Console (JSON) and put it to ${project_root}/backend/workload-service-auth.json
+- change to ${project_root}/backend
+- execute command `gcloud beta emulators datastore start` to start the datastore emulator
+- start the spring backend application adding system property `spring.profiles.active=development`
