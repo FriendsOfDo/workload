@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class WorkDay {
@@ -27,8 +26,8 @@ public class WorkDay {
         }
 
         public Builder add(Event event) {
-            Date tmp = event.getDate();
-            if (LocalDate.of(tmp.getYear(), tmp.getMonth(), tmp.getDay()).isEqual(date)) {
+            LocalDate eventDate = DateUtils.toLocalDate(event.getDate());
+            if (eventDate.isEqual(date)) {
                 events.add(event);
             }
             return this;
@@ -58,13 +57,13 @@ public class WorkDay {
             workDay.date = date;
             workDay.workingTime = workingTime;
             workDay.pauseTime = pauseTime;
-            workDay.events = events;
+            workDay.events = new ArrayList<>(events);
 
             return workDay;
         }
     }
 
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDate date;
     private int workingTime;
     private int pauseTime;

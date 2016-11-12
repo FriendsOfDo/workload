@@ -99,4 +99,8 @@ public class WorkWeek {
                 ", workDays=" + workDays +
                 '}';
     }
+
+    public static Builder newBuilder(int year, int weekOfYear) {
+        return new Builder(year, weekOfYear);
+    }
 }

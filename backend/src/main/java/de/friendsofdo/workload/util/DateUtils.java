@@ -18,18 +18,22 @@ public class DateUtils {
     }
 
     public static LocalDate toLocalDate(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
         return LocalDate.of(
-                date.getYear(),
-                date.getMonth(),
-                date.getDay());
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH)+1,
+                cal.get(Calendar.DAY_OF_MONTH));
     }
 
     public static LocalDateTime toLocalDateTime(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
         return LocalDateTime.of(
-                date.getYear(),
-                date.getMonth(),
-                date.getDay(),
-                date.getHours(),
-                date.getMinutes());
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH)+1,
+                cal.get(Calendar.DAY_OF_MONTH),
+                cal.get(Calendar.HOUR_OF_DAY),
+                cal.get(Calendar.MINUTE));
     }
 }
