@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/events")
+@RequestMapping("/{userId}/events")
 public class EventController {
 
     @Autowired
@@ -19,7 +19,7 @@ public class EventController {
         return eventService.save(event);
     }
 
-    @RequestMapping(path = "/{userId}", produces = "application/json", method = RequestMethod.GET)
+    @RequestMapping(produces = "application/json", method = RequestMethod.GET)
     public List<Event> list(@PathVariable("userId") String userId) {
         return eventService.list(userId);
     }

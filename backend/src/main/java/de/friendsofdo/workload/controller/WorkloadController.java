@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/workloads")
+@RequestMapping("/{userId}/workloads")
 public class WorkloadController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkloadController.class);

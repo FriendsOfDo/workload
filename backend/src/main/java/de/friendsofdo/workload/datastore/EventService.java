@@ -41,12 +41,17 @@ public class EventService {
     }
 
     public List<Event> list(String userId) {
+        return list(userId, Integer.MAX_VALUE);
+    }
+
+    public List<Event> list(String userId, int limit) {
         List<Event> events = new ArrayList<>();
 
         EntityQuery query = Query.newEntityQueryBuilder()
                 .setKind(KIND)
                 .setFilter(StructuredQuery.PropertyFilter.eq("userId", userId))
-                .setOrderBy(StructuredQuery.OrderBy.asc("date"))
+                .setOrderBy(StructuredQuery.OrderBy.desc("date"))
+                .setLimit(limit)
                 .build();
 
         QueryResults<Entity> result = datastore.run(query);
