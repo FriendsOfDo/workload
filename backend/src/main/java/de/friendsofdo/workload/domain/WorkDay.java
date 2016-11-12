@@ -1,35 +1,90 @@
 package de.friendsofdo.workload.domain;
 
+import de.friendsofdo.workload.util.DateUtils;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class WorkDay {
 
-    private Date date;
-    private int workingTime;
-    private int pauseTime;
+    public static class Builder {
 
-    public Date getDate() {
-        return date;
+        private LocalDate date;
+        private List<Event> events;
+        private int workingTime;
+        private int pauseTime;
+
+        public Builder(LocalDate date) {
+            this.date = date;
+            this.workingTime = 0;
+            this.pauseTime = 0;
+            this.events = new ArrayList<>();
+        }
+
+        public Builder add(Event event) {
+            Date tmp = event.getDate();
+            if (LocalDate.of(tmp.getYear(), tmp.getMonth(), tmp.getDay()).isEqual(date)) {
+                events.add(event);
+            }
+            return this;
+        }
+
+        public WorkDay build() {
+            events.sort((one, two) -> one.getDate().compareTo(two.getDate()));
+
+            for (int idx = 1; idx < events.size(); idx++) {
+                Event previous = events.get(idx - 1);
+                Event current = events.get(idx);
+
+                if (previous.getType() == Event.Type.IN && current.getType() == Event.Type.OUT) {
+                    LocalDateTime start = DateUtils.toLocalDateTime(previous.getDate());
+                    LocalDateTime end = DateUtils.toLocalDateTime(current.getDate());
+
+                    workingTime += ChronoUnit.MINUTES.between(start, end);
+                } else if (previous.getType() == Event.Type.OUT && current.getType() == Event.Type.IN) {
+                    LocalDateTime start = DateUtils.toLocalDateTime(previous.getDate());
+                    LocalDateTime end = DateUtils.toLocalDateTime(current.getDate());
+
+                    pauseTime += ChronoUnit.MINUTES.between(start, end);
+                }
+            }
+
+            WorkDay workDay = new WorkDay();
+            workDay.date = date;
+            workDay.workingTime = workingTime;
+            workDay.pauseTime = pauseTime;
+            workDay.events = events;
+
+            return workDay;
+        }
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    private LocalDate date;
+    private int workingTime;
+    private int pauseTime;
+    private List<Event> events;
+
+    private WorkDay() {
+    }
+
+    public LocalDate getDate() {
+        return date;
     }
 
     public int getWorkingTime() {
         return workingTime;
     }
 
-    public void setWorkingTime(int workingTime) {
-        this.workingTime = workingTime;
-    }
-
     public int getPauseTime() {
         return pauseTime;
     }
 
-    public void setPauseTime(int pauseTime) {
-        this.pauseTime = pauseTime;
+    public List<Event> getEvents() {
+        return events;
     }
 
     @Override
@@ -38,6 +93,11 @@ public class WorkDay {
                 "date=" + date +
                 ", workingTime=" + workingTime +
                 ", pauseTime=" + pauseTime +
+                ", events=" + events +
                 '}';
+    }
+
+    public static Builder newBuilder(LocalDate date) {
+        return new Builder(date);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -45,8 +46,6 @@ public class EventService {
     }
 
     public List<Event> list(String userId, int limit) {
-        List<Event> events = new ArrayList<>();
-
         EntityQuery query = Query.newEntityQueryBuilder()
                 .setKind(KIND)
                 .setFilter(StructuredQuery.PropertyFilter.eq("userId", userId))
@@ -55,6 +54,27 @@ public class EventService {
                 .build();
 
         QueryResults<Entity> result = datastore.run(query);
+        return transformResult(result);
+    }
+
+    public List<Event> list(String userId, Date from, Date to) {
+        EntityQuery query = Query.newEntityQueryBuilder()
+                .setKind(KIND)
+                .setFilter(StructuredQuery.CompositeFilter.and(
+                        StructuredQuery.PropertyFilter.eq("userId", userId),
+                        StructuredQuery.PropertyFilter.ge("date", DateTime.copyFrom(from)),
+                        StructuredQuery.PropertyFilter.le("date", DateTime.copyFrom(to))
+                ))
+                .setOrderBy(StructuredQuery.OrderBy.desc("date"))
+                .build();
+
+        QueryResults<Entity> result = datastore.run(query);
+        return transformResult(result);
+    }
+
+    private List<Event> transformResult(QueryResults<Entity> result) {
+        final List<Event> events = new ArrayList<>();
+
         result.forEachRemaining(entity -> events.add(Event.newBuilder()
                 .type(Event.Type.valueOf(entity.getString("type")))
                 .date(entity.getDateTime("date").toDate())
