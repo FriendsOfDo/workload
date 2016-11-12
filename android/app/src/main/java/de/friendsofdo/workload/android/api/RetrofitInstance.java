@@ -5,7 +5,8 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class RetrofitInstance {
 
-    private static final String BACKEND_BASE_URL = "http://10.0.2.2:8080";
+    // private static final String BACKEND_BASE_URL = "http://10.0.2.2:8080";
+    private static final String BACKEND_BASE_URL = "https://workload-149313.appspot.com";
 
     public static Retrofit get() {
 

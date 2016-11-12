@@ -1,5 +1,6 @@
 package de.friendsofdo.workload.android.api;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -16,6 +17,8 @@ public class Event {
 
     private Long id;
     private Type type;
+
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm")
     private Date date;
 
     public Long getId() {

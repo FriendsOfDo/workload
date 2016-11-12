@@ -14,7 +14,9 @@ import java.util.Date;
 import de.friendsofdo.workload.android.api.Event;
 import de.friendsofdo.workload.android.api.EventService;
 import de.friendsofdo.workload.android.api.RetrofitInstance;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Response;
 
 public class LogEventService extends Service {
 
@@ -51,6 +53,10 @@ public class LogEventService extends Service {
 
         String action = intent.getAction();
 
+        if(action == null) {
+            return super.onStartCommand(intent, flags, startId);
+        }
+
         Event.Type eventType;
 
         if (action.equals(ACTION_EVENT_IN)) {
@@ -82,7 +88,12 @@ public class LogEventService extends Service {
             Event event = events[0];
             Call<Event> save = eventService.save(userId, event);
             try {
-                return save.execute().body();
+                Response<Event> execute = save.execute();
+                if(!execute.isSuccessful()) {
+                    ResponseBody responseBody = execute.errorBody();
+                    Log.e(TAG, "Restoring status from backend failed: " + (responseBody != null ? responseBody.string() : "no info") );
+                }
+                return execute.body();
             } catch (IOException e) {
                 Log.e(TAG, "Storing event to backend failed: " + e.getMessage(), e);
                 return null;

@@ -24,11 +24,11 @@ import de.friendsofdo.workload.android.api.Event;
 import de.friendsofdo.workload.android.api.RetrofitInstance;
 import de.friendsofdo.workload.android.api.Status;
 import de.friendsofdo.workload.android.api.StatusService;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class WorkloadActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class WorkloadActivity extends BaseActivity {
 
     private Event.Type currentState;
     private StatusService statusService;
@@ -88,63 +88,6 @@ public class WorkloadActivity extends AppCompatActivity
         super.onSaveInstanceState(outState, outPersistentState);
     }
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.workload, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
 
     private void storeEvent() {
         Intent serviceIntent = new Intent(getApplicationContext(), LogEventService.class);
@@ -180,6 +123,10 @@ public class WorkloadActivity extends AppCompatActivity
             Call<de.friendsofdo.workload.android.api.Status> call = statusService.get(userId);
             try {
                 Response<de.friendsofdo.workload.android.api.Status> execute = call.execute();
+                if(!execute.isSuccessful()) {
+                    ResponseBody responseBody = execute.errorBody();
+                    Log.e(TAG, "Restoring status from backend failed: " + (responseBody != null ? responseBody.string() : "no info") );
+                }
                 return execute.body();
             } catch (IOException e) {
                 Log.e(TAG, "Restoring status from backend failed: " + e.getMessage(), e);
