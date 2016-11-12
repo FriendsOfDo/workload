@@ -52,6 +52,7 @@ public class BackendApplication {
                 .setConnectTimeout(datastoreProperties.getConnectTimeout())
                 .setReadTimeout(datastoreProperties.getReadTimeout())
                 .setAuthCredentials(AuthCredentials.createForJson(new FileInputStream(projectProperties.getAuthKeyFile())))
+                .setNamespace("Workload")
                 .build()
                 .getService();
     }
@@ -70,8 +71,9 @@ public class BackendApplication {
 
         return DatastoreOptions.newBuilder()
                 .setProjectId(projectProperties.getId())
-                .setConnectTimeout(datastoreProperties.getConnectTimeout())
-                .setReadTimeout(datastoreProperties.getReadTimeout())
+                //.setConnectTimeout(datastoreProperties.getConnectTimeout())
+                //.setReadTimeout(datastoreProperties.getReadTimeout())
+                .setNamespace("Workload")
                 .build()
                 .getService();
     }
