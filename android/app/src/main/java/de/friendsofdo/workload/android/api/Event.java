@@ -18,7 +18,7 @@ public class Event {
     private Long id;
     private Type type;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private Date date;
 
     public Long getId() {
