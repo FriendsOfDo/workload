@@ -14,4 +14,4 @@ project:
   authKeyFile: workload-service-auth.json
 
 datastore:
-  host: localhost:8778
+  host: localhost:8045

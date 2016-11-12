@@ -40,11 +40,12 @@ public class EventService {
         return event;
     }
 
-    public List<Event> list() {
+    public List<Event> list(String userId) {
         List<Event> events = new ArrayList<>();
 
         EntityQuery query = Query.newEntityQueryBuilder()
                 .setKind(KIND)
+                .setFilter(StructuredQuery.PropertyFilter.eq("userId", userId))
                 .setOrderBy(StructuredQuery.OrderBy.asc("date"))
                 .build();
 
