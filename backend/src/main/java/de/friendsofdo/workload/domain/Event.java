@@ -9,16 +9,49 @@ public class Event {
         OUT
     }
 
-    private String id;
+    public static class Builder {
+
+        private Event event;
+
+        public Builder() {
+            this.event = new Event();
+        }
+
+        public Builder type(Type type) {
+            event.setType(type);
+            return this;
+        }
+
+        public Builder userId(String userId) {
+            event.setUserId(userId);
+            return this;
+        }
+
+        public Builder id(long id) {
+            event.setId(id);
+            return this;
+        }
+
+        public Builder date(Date date) {
+            event.setDate(date);
+            return this;
+        }
+
+        public Event build() {
+            return event;
+        }
+    }
+
+    private long id;
     private String userId;
     private Type type;
     private Date date;
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -54,5 +87,9 @@ public class Event {
                 ", type=" + type +
                 ", date=" + date +
                 '}';
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 }

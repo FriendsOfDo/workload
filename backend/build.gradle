@@ -30,5 +30,8 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-data-rest')
 	compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-configuration-processor')
+    compile('com.google.cloud:google-cloud-datastore:0.5.1')
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }

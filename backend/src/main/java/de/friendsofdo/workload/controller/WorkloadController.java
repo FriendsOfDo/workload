@@ -18,8 +18,6 @@ public class WorkloadController {
 
     @RequestMapping(produces = "application/json", method = RequestMethod.GET)
     public List<WorkWeek> list() {
-        LOGGER.info("GET /workloads");
-
         // TODO
 
         return new ArrayList<>();

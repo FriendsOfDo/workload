@@ -1,0 +1,17 @@
+project:
+  id: workload-149313
+
+datastore:
+  connectTimeout: 10
+  readTimeout: 30
+
+---
+
+spring:
+  profiles: development
+
+project:
+  authKeyFile: workload-service-auth.json
+
+datastore:
+  host: localhost:8778
