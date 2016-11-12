@@ -1,5 +1,7 @@
 package de.friendsofdo.workload.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
 public class Event {
@@ -45,6 +47,8 @@ public class Event {
     private long id;
     private String userId;
     private Type type;
+
+    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm")
     private Date date;
 
     public long getId() {

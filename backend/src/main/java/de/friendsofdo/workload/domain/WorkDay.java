@@ -1,5 +1,6 @@
 package de.friendsofdo.workload.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import de.friendsofdo.workload.util.DateUtils;
 
 import java.time.LocalDate;
@@ -63,6 +64,7 @@ public class WorkDay {
         }
     }
 
+    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm")
     private LocalDate date;
     private int workingTime;
     private int pauseTime;
