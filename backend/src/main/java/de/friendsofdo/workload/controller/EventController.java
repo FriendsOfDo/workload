@@ -15,7 +15,8 @@ public class EventController {
     private EventService eventService;
 
     @RequestMapping(consumes = "application/json", produces = "application/json", method = RequestMethod.POST)
-    public Event save(@RequestBody Event event) {
+    public Event save(@PathVariable("userId") String userId, @RequestBody Event event) {
+        event.setUserId(userId);
         return eventService.save(event);
     }
 
