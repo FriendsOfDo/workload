@@ -46,13 +46,33 @@ public class BackendApplication {
             LOGGER.debug("-----");
         }
 
-        return DatastoreOptions.builder()
-                .projectId(projectProperties.getId())
-                .host(datastoreProperties.getHost())
-                .readTimeout(datastoreProperties.getReadTimeout())
-                .connectTimeout(datastoreProperties.getConnectTimeout())
-                .authCredentials(AuthCredentials.createForJson(new FileInputStream(projectProperties.getAuthKeyFile())))
+        return DatastoreOptions.newBuilder()
+                .setProjectId(projectProperties.getId())
+                .setHost(datastoreProperties.getHost())
+                .setConnectTimeout(datastoreProperties.getConnectTimeout())
+                .setReadTimeout(datastoreProperties.getReadTimeout())
+                .setAuthCredentials(AuthCredentials.createForJson(new FileInputStream(projectProperties.getAuthKeyFile())))
                 .build()
-                .service();
+                .getService();
+    }
+
+    @Bean
+    @Profile("production")
+    public Datastore productionCloudDatastore() throws IOException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("-----");
+            LOGGER.debug("instantiate Datastore bean for 'production':");
+            LOGGER.debug("projectId: " + projectProperties.getId());
+            LOGGER.debug("datastore connect timeout: " + datastoreProperties.getConnectTimeout());
+            LOGGER.debug("datastore read timeout: " + datastoreProperties.getReadTimeout());
+            LOGGER.debug("-----");
+        }
+
+        return DatastoreOptions.newBuilder()
+                .setProjectId(projectProperties.getId())
+                .setConnectTimeout(datastoreProperties.getConnectTimeout())
+                .setReadTimeout(datastoreProperties.getReadTimeout())
+                .build()
+                .getService();
     }
 }
