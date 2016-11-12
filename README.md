@@ -34,3 +34,8 @@ GET /workloads/{year}/{weekOfYear}/{dayOfWeek}
 - change to ${project_root}/backend
 - execute command `gcloud beta emulators datastore start` to start the datastore emulator
 - start the spring backend application adding system property `spring.profiles.active=development`
+
+# Deployments
+- `cd ${project_root}/backend`
+- `./gradlew build`
+- `gcloud app deploy -v ${version}`
