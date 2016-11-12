@@ -71,8 +71,6 @@ public class BackendApplication {
 
         return DatastoreOptions.newBuilder()
                 .setProjectId(projectProperties.getId())
-                //.setConnectTimeout(datastoreProperties.getConnectTimeout())
-                //.setReadTimeout(datastoreProperties.getReadTimeout())
                 .setNamespace("Workload")
                 .build()
                 .getService();

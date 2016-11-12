@@ -63,7 +63,6 @@ public class WorkDay {
         }
     }
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDate date;
     private int workingTime;
     private int pauseTime;

@@ -1,0 +1,10 @@
+indexes:
+- kind: "Event"
+  properties:
+  - name: "userId"
+  - name: "date"
+- kind: "Event"
+  properties:
+  - name: "userId"
+  - name: "date"
+    direction: desc

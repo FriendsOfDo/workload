@@ -2,6 +2,8 @@ package de.friendsofdo.workload.datastore;
 
 import com.google.cloud.datastore.*;
 import de.friendsofdo.workload.domain.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +15,10 @@ import java.util.List;
 @Component
 public class EventService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventService.class);
+
     private static final String KIND = "Event";
+    public static final String NAMESPACE = "Workload";
 
     @Autowired
     private Datastore datastore;
@@ -22,7 +27,7 @@ public class EventService {
 
     @PostConstruct
     public void init() {
-        keyFactory = datastore.newKeyFactory().setKind(KIND);
+        keyFactory = datastore.newKeyFactory().setKind(KIND).setNamespace(NAMESPACE);
     }
 
     public Event save(Event event) {
@@ -35,6 +40,8 @@ public class EventService {
                 .set("type", event.getType().name())
                 .build();
 
+        LOGGER.debug("Save entity: {}", entity.toString());
+
         Entity added = datastore.add(entity);
         event.setId(added.getKey().getId());
 
@@ -46,7 +53,10 @@ public class EventService {
     }
 
     public List<Event> list(String userId, int limit) {
+        LOGGER.debug("List events for user {} with limit {}", userId, limit);
+
         EntityQuery query = Query.newEntityQueryBuilder()
+                .setNamespace(NAMESPACE)
                 .setKind(KIND)
                 .setFilter(StructuredQuery.PropertyFilter.eq("userId", userId))
                 .setOrderBy(StructuredQuery.OrderBy.desc("date"))
@@ -58,7 +68,10 @@ public class EventService {
     }
 
     public List<Event> list(String userId, Date from, Date to) {
+        LOGGER.debug("List events for user {} between from {} and {}", userId, from, to);
+
         EntityQuery query = Query.newEntityQueryBuilder()
+                .setNamespace(NAMESPACE)
                 .setKind(KIND)
                 .setFilter(StructuredQuery.CompositeFilter.and(
                         StructuredQuery.PropertyFilter.eq("userId", userId),
