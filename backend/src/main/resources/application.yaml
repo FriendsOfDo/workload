@@ -5,6 +5,10 @@ datastore:
   connectTimeout: 10
   readTimeout: 30
 
+endpoints:
+  health:
+    path: /_ah/health
+
 ---
 
 spring:
