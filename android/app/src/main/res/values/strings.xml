@@ -5,4 +5,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="status_freetime">You have freetime. Enoy!</string>
+    <string name="status_work">You are at work. Don´t worry you are almost done!</string>
 </resources>

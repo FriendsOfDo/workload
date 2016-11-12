@@ -1,7 +1,12 @@
-package de.friendsofdo.workload.android;
+package de.friendsofdo.workload.android.api;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Date;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
 
     public enum Type {
@@ -9,25 +14,16 @@ public class Event {
         OUT
     }
 
-    private String id;
-    private String userId;
+    private Long id;
     private Type type;
     private Date date;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
     public Type getType() {
@@ -50,7 +46,6 @@ public class Event {
     public String toString() {
         return "Event{" +
                 "id='" + id + '\'' +
-                ", userId='" + userId + '\'' +
                 ", type=" + type +
                 ", date=" + date +
                 '}';

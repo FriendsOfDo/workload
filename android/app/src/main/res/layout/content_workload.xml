@@ -13,8 +13,32 @@
     tools:context="de.friendsofdo.workload.android.WorkloadActivity"
     tools:showIn="@layout/app_bar_workload">
 
-    <TextView
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true">
+
+        <ImageView
+            android:id="@+id/status_icon"
+            app:srcCompat="@drawable/ic_local_bar_black_24dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginBottom="10px"/>
+
+        <TextView
+            android:id="@+id/status_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/status_freetime"
+            android:textSize="@dimen/status_text_size"/>
+
+    </LinearLayout>
+
 </RelativeLayout>

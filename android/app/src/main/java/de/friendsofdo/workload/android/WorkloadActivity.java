@@ -1,9 +1,11 @@
 package de.friendsofdo.workload.android;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -13,11 +15,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import java.util.Date;
+import java.io.IOException;
+
+import de.friendsofdo.workload.android.api.Event;
+import de.friendsofdo.workload.android.api.RetrofitInstance;
+import de.friendsofdo.workload.android.api.Status;
+import de.friendsofdo.workload.android.api.StatusService;
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class WorkloadActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private Event.Type currentState;
+    private StatusService statusService;
+    private static final String TAG = "WorkloadActivity";
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +46,7 @@ public class WorkloadActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent serviceIntent = new Intent(getApplicationContext(), LogEventService.class);
-                serviceIntent.setAction(LogEventService.ACTION_EVENT_IN);
-                startService(serviceIntent);
+                storeEvent();
             }
         });
 
@@ -42,8 +56,36 @@ public class WorkloadActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        userId = UserIdProvider.get(this);
+        statusService = RetrofitInstance.get().create(StatusService.class);
+
+        new GetStatusFromBackendTask().execute();
+
+        Log.i(TAG, "Workload activity created.");
+    }
+
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        Object currentState = savedInstanceState.get("currentState");
+        if (currentState instanceof String) {
+            this.currentState = Event.Type.valueOf((String) currentState);
+            adaptViewToCurrentState();
+        }
+
+        Log.i(TAG, "WorkloadActivity state restored.");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        if (currentState != null) {
+            outState.putString("currentState", currentState.name());
+        }
+        super.onSaveInstanceState(outState, outPersistentState);
     }
 
     @Override
@@ -55,6 +97,7 @@ public class WorkloadActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -101,5 +144,59 @@ public class WorkloadActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void storeEvent() {
+        Intent serviceIntent = new Intent(getApplicationContext(), LogEventService.class);
+        if(currentState == Event.Type.IN) {
+            serviceIntent.setAction(LogEventService.ACTION_EVENT_OUT);
+            currentState = Event.Type.OUT;
+        } else if (currentState == Event.Type.OUT) {
+            serviceIntent.setAction(LogEventService.ACTION_EVENT_IN);
+            currentState = Event.Type.IN;
+        } else {
+            Log.e(TAG, "Unknown status.");
+        }
+        startService(serviceIntent);
+        adaptViewToCurrentState();
+    }
+
+    private void adaptViewToCurrentState() {
+        if (currentState == Event.Type.IN) {
+            ((FloatingActionButton) findViewById(R.id.fab)).setImageResource(R.drawable.ic_local_bar_black_24dp);
+            ((TextView) findViewById(R.id.status_text)).setText(R.string.status_work);
+            ((ImageView) findViewById(R.id.status_icon)).setImageResource(R.drawable.ic_work_black_24dp);
+        } else {
+            ((FloatingActionButton) findViewById(R.id.fab)).setImageResource(R.drawable.ic_work_black_24dp);
+            ((TextView) findViewById(R.id.status_text)).setText(R.string.status_freetime);
+            ((ImageView) findViewById(R.id.status_icon)).setImageResource(R.drawable.ic_local_bar_black_24dp);
+        }
+    }
+
+    class GetStatusFromBackendTask extends AsyncTask<Void, Void, de.friendsofdo.workload.android.api.Status> {
+
+        @Override
+        protected de.friendsofdo.workload.android.api.Status doInBackground(Void... voids) {
+            Call<de.friendsofdo.workload.android.api.Status> call = statusService.get(userId);
+            try {
+                Response<de.friendsofdo.workload.android.api.Status> execute = call.execute();
+                return execute.body();
+            } catch (IOException e) {
+                Log.e(TAG, "Restoring status from backend failed: " + e.getMessage(), e);
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(de.friendsofdo.workload.android.api.Status status) {
+            if(status != null) {
+                WorkloadActivity.this.currentState = status.isAtWork() ? Event.Type.IN : Event.Type.OUT;
+                Log.i(TAG, "Status successfully restored from backend: " + WorkloadActivity.this.currentState.name());
+            } else {
+                WorkloadActivity.this.currentState = Event.Type.OUT;
+                Log.i(TAG, "Using default status (OUT)");
+            }
+            WorkloadActivity.this.adaptViewToCurrentState();
+        }
     }
 }
