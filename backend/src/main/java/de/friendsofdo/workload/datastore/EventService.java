@@ -34,11 +34,7 @@ public class EventService {
         IncompleteKey incKey = keyFactory.newKey();
         Key key = datastore.allocateId(incKey);
 
-        Entity entity = Entity.newBuilder(key)
-                .set("userId", event.getUserId())
-                .set("date", DateTime.copyFrom(event.getDate()))
-                .set("type", event.getType().name())
-                .build();
+        Entity entity = constructEntity(key, event);
 
         LOGGER.debug("Save entity: {}", entity.toString());
 
@@ -85,15 +81,31 @@ public class EventService {
         return transformResult(result);
     }
 
-    private List<Event> transformResult(QueryResults<Entity> result) {
-        final List<Event> events = new ArrayList<>();
+    private Entity constructEntity(Key key, Event event) {
+        return Entity.newBuilder(key)
+                .set("userId", event.getUserId())
+                .set("date", DateTime.copyFrom(event.getDate()))
+                .set("type", event.getType().name())
+                .set("lat", event.getLat())
+                .set("lon", event.getLon())
+                .build();
+    }
 
-        result.forEachRemaining(entity -> events.add(Event.newBuilder()
+    private Event constructEvent(Entity entity) {
+        return Event.newBuilder()
                 .type(Event.Type.valueOf(entity.getString("type")))
                 .date(entity.getDateTime("date").toDate())
                 .userId(entity.getString("userId"))
+                .lat(entity.getDouble("lat"))
+                .lon(entity.getDouble("lon"))
                 .id(entity.getKey().getId())
-                .build()));
+                .build();
+    }
+
+    private List<Event> transformResult(QueryResults<Entity> result) {
+        final List<Event> events = new ArrayList<>();
+
+        result.forEachRemaining(entity -> events.add(constructEvent(entity)));
 
         return events;
     }

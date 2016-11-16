@@ -39,6 +39,16 @@ public class Event {
             return this;
         }
 
+        public Builder lat(double lat) {
+            event.setLat(lat);
+            return this;
+        }
+
+        public Builder lon(double lon) {
+            event.setLon(lon);
+            return this;
+        }
+
         public Event build() {
             return event;
         }
@@ -47,8 +57,10 @@ public class Event {
     private long id;
     private String userId;
     private Type type;
+    private double lat;
+    private double lon;
 
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date date;
 
     public long getId() {
@@ -83,12 +95,30 @@ public class Event {
         this.date = date;
     }
 
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
+    }
+
     @Override
     public String toString() {
         return "Event{" +
-                "id='" + id + '\'' +
+                "id=" + id +
                 ", userId='" + userId + '\'' +
                 ", type=" + type +
+                ", lat=" + lat +
+                ", lon=" + lon +
                 ", date=" + date +
                 '}';
     }
