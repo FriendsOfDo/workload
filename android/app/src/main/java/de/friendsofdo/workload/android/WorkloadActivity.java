@@ -1,20 +1,21 @@
 package de.friendsofdo.workload.android;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.design.widget.FloatingActionButton;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,13 +23,14 @@ import java.io.IOException;
 
 import de.friendsofdo.workload.android.api.Event;
 import de.friendsofdo.workload.android.api.RetrofitInstance;
-import de.friendsofdo.workload.android.api.Status;
 import de.friendsofdo.workload.android.api.StatusService;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
 public class WorkloadActivity extends BaseActivity {
+
+    private static final int REQUEST_LOCATION = 110;
 
     private Event.Type currentState;
     private StatusService statusService;
@@ -88,10 +90,30 @@ public class WorkloadActivity extends BaseActivity {
         super.onSaveInstanceState(outState, outPersistentState);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        askForLocationPermissions();
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void askForLocationPermissions() {
+        boolean coarsePermissions = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean finePermissions = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+        if (coarsePermissions || finePermissions) {
+            Log.d(TAG, "Location permissions already granted");
+        } else {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+        }
+    }
 
     private void storeEvent() {
         Intent serviceIntent = new Intent(getApplicationContext(), LogEventService.class);
-        if(currentState == Event.Type.IN) {
+        if (currentState == Event.Type.IN) {
             serviceIntent.setAction(LogEventService.ACTION_EVENT_OUT);
             currentState = Event.Type.OUT;
         } else if (currentState == Event.Type.OUT) {
@@ -123,9 +145,9 @@ public class WorkloadActivity extends BaseActivity {
             Call<de.friendsofdo.workload.android.api.Status> call = statusService.get(userId);
             try {
                 Response<de.friendsofdo.workload.android.api.Status> execute = call.execute();
-                if(!execute.isSuccessful()) {
+                if (!execute.isSuccessful()) {
                     ResponseBody responseBody = execute.errorBody();
-                    Log.e(TAG, "Restoring status from backend failed: " + (responseBody != null ? responseBody.string() : "no info") );
+                    Log.e(TAG, "Restoring status from backend failed: " + (responseBody != null ? responseBody.string() : "no info"));
                 }
                 return execute.body();
             } catch (IOException e) {
@@ -136,7 +158,7 @@ public class WorkloadActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(de.friendsofdo.workload.android.api.Status status) {
-            if(status != null) {
+            if (status != null) {
                 WorkloadActivity.this.currentState = status.isAtWork() ? Event.Type.IN : Event.Type.OUT;
                 Log.i(TAG, "Status successfully restored from backend: " + WorkloadActivity.this.currentState.name());
             } else {

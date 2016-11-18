@@ -17,8 +17,10 @@ public class Event {
 
     private Long id;
     private Type type;
+    private double lat;
+    private double lon;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date date;
 
     public Long getId() {
@@ -37,6 +39,22 @@ public class Event {
         this.type = type;
     }
 
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
+    }
+
     public Date getDate() {
         return date;
     }
@@ -48,8 +66,10 @@ public class Event {
     @Override
     public String toString() {
         return "Event{" +
-                "id='" + id + '\'' +
+                "id=" + id +
                 ", type=" + type +
+                ", lat=" + lat +
+                ", lon=" + lon +
                 ", date=" + date +
                 '}';
     }
