@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
@@ -106,8 +107,22 @@ public class WorkloadActivity extends BaseActivity {
 
         if (coarsePermissions || finePermissions) {
             Log.d(TAG, "Location permissions already granted");
+            Intent serviceIntent = new Intent(getApplicationContext(), LogEventService_.class);
+            serviceIntent.setAction(LogEventService.ACTION_OBSERVE_LOCATION_UPDATES);
+            startService(serviceIntent);
         } else {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Intent serviceIntent = new Intent(getApplicationContext(), LogEventService_.class);
+            serviceIntent.setAction(LogEventService.ACTION_OBSERVE_LOCATION_UPDATES);
+            startService(serviceIntent);
         }
     }
 

@@ -36,6 +36,7 @@ public class LogEventService extends Service implements LocationListener, Google
 
     public static final String ACTION_EVENT_IN = "de.friendsofdo.workload.android.EVENT_IN";
     public static final String ACTION_EVENT_OUT = "de.friendsofdo.workload.android.EVENT_OUT";
+    public static final String ACTION_OBSERVE_LOCATION_UPDATES = "de.friendsofdo.workload.android.OBSERVE_LOCATION_UPDATES";
 
     public static final int LOCATION_UPDATE_INTERVAL = 1000 * 60 * 5;
 
@@ -81,20 +82,29 @@ public class LogEventService extends Service implements LocationListener, Google
             return super.onStartCommand(intent, flags, startId);
         }
 
-        Event.Type eventType;
-
         switch (action) {
             case ACTION_EVENT_IN:
-                eventType = Event.Type.IN;
+                processEvent(Event.Type.IN);
                 break;
             case ACTION_EVENT_OUT:
-                eventType = Event.Type.OUT;
+                processEvent(Event.Type.OUT);
+                break;
+            case ACTION_OBSERVE_LOCATION_UPDATES:
+                observeListeningToLocationUpdates();
                 break;
             default:
                 throw new IllegalArgumentException("Invalid event type received. Has to be '" + ACTION_EVENT_IN
-                        + "' or '" + ACTION_EVENT_OUT + "'");
+                        + "' or '" + ACTION_EVENT_OUT + "' or '" + ACTION_OBSERVE_LOCATION_UPDATES);
         }
 
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void observeListeningToLocationUpdates() {
+        // nothing to do
+    }
+
+    private void processEvent(Event.Type eventType) {
         Date now = new Date();
 
         Event event = new Event();
@@ -109,8 +119,6 @@ public class LogEventService extends Service implements LocationListener, Google
         Log.i(TAG, "Storing event " + event.toString() + " to backend.");
 
         sendEventToBackend(event);
-
-        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
