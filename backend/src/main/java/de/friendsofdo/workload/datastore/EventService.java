@@ -4,44 +4,44 @@ import com.google.cloud.datastore.*;
 import de.friendsofdo.workload.domain.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Component
-public class EventService {
+public class EventService extends AbstractDatastoreService<Event> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventService.class);
 
+    private static final String NAMESPACE = "Workload";
     private static final String KIND = "Event";
-    public static final String NAMESPACE = "Workload";
 
-    @Autowired
-    private Datastore datastore;
-
-    private KeyFactory keyFactory;
-
-    @PostConstruct
-    public void init() {
-        keyFactory = datastore.newKeyFactory().setKind(KIND).setNamespace(NAMESPACE);
+    public EventService() {
+        super(KIND, NAMESPACE);
     }
 
-    public Event save(Event event) {
-        IncompleteKey incKey = keyFactory.newKey();
-        Key key = datastore.allocateId(incKey);
+    @Override
+    protected Entity constructEntity(Key key, Event event) {
+        return Entity.newBuilder(key)
+                .set("userId", event.getUserId())
+                .set("date", DateTime.copyFrom(event.getDate()))
+                .set("type", event.getType().name())
+                .set("lat", event.getLat())
+                .set("lon", event.getLon())
+                .build();
+    }
 
-        Entity entity = constructEntity(key, event);
-
-        LOGGER.debug("Save entity: {}", entity.toString());
-
-        Entity added = datastore.add(entity);
-        event.setId(added.getKey().getId());
-
-        return event;
+    @Override
+    protected Event constructItem(Entity entity) {
+        return Event.newBuilder()
+                .id(entity.getKey().getId())
+                .userId(entity.getString("userId"))
+                .type(Event.Type.valueOf(entity.getString("type")))
+                .date(entity.getDateTime("date").toDate())
+                .lat(entity.getDouble("lat"))
+                .lon(entity.getDouble("lon"))
+                .build();
     }
 
     public List<Event> list(String userId) {
@@ -79,34 +79,5 @@ public class EventService {
 
         QueryResults<Entity> result = datastore.run(query);
         return transformResult(result);
-    }
-
-    private Entity constructEntity(Key key, Event event) {
-        return Entity.newBuilder(key)
-                .set("userId", event.getUserId())
-                .set("date", DateTime.copyFrom(event.getDate()))
-                .set("type", event.getType().name())
-                .set("lat", event.getLat())
-                .set("lon", event.getLon())
-                .build();
-    }
-
-    private Event constructEvent(Entity entity) {
-        return Event.newBuilder()
-                .type(Event.Type.valueOf(entity.getString("type")))
-                .date(entity.getDateTime("date").toDate())
-                .userId(entity.getString("userId"))
-                .lat(entity.getDouble("lat"))
-                .lon(entity.getDouble("lon"))
-                .id(entity.getKey().getId())
-                .build();
-    }
-
-    private List<Event> transformResult(QueryResults<Entity> result) {
-        final List<Event> events = new ArrayList<>();
-
-        result.forEachRemaining(entity -> events.add(constructEvent(entity)));
-
-        return events;
     }
 }

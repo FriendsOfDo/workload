@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
-public class Event {
+public class Event implements DatastoreEntity {
 
     public enum Type {
         IN,
