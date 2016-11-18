@@ -9,6 +9,23 @@ endpoints:
   health:
     path: /_ah/health
 
+logbook:
+    exclude:
+        - /_ah/health
+        - /admin/**
+    filter.enabled: true
+    format.style: json
+    obfuscate:
+        headers:
+            - Authorization
+            - X-Secret
+        parameters:
+            - access_token
+            - password
+    write:
+        category: http.wire-log
+        level: INFO
+
 ---
 
 spring:

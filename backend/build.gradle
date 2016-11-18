@@ -33,6 +33,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-configuration-processor')
     compile('com.google.cloud:google-cloud-datastore:0.5.1')
     compile('com.google.guava:guava:19.0')
+	compile('org.zalando:logbook-spring-boot-starter:1.0.1')
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
