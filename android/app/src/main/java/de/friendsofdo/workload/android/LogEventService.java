@@ -5,7 +5,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -19,29 +18,35 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import org.androidannotations.annotations.Background;
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.EService;
+
 import java.io.IOException;
 import java.util.Date;
 
 import de.friendsofdo.workload.android.api.Event;
-import de.friendsofdo.workload.android.api.EventService;
 import de.friendsofdo.workload.android.api.RetrofitInstance;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.Response;
 
+@EService
 public class LogEventService extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "LogEventService";
 
     public static final String ACTION_EVENT_IN = "de.friendsofdo.workload.android.EVENT_IN";
     public static final String ACTION_EVENT_OUT = "de.friendsofdo.workload.android.EVENT_OUT";
+
     public static final int LOCATION_UPDATE_INTERVAL = 1000 * 60 * 5;
 
     private GoogleApiClient googleApiClient;
     private Location lastKnownLocation;
 
-    private EventService eventService;
-    private String userId;
+    @Bean
+    protected RetrofitInstance retrofitInstance;
+
+    @Bean
+    protected UserIdProvider userIdProvider;
 
     @Nullable
     @Override
@@ -54,9 +59,6 @@ public class LogEventService extends Service implements LocationListener, Google
         super.onCreate();
 
         Log.i(TAG, "Start service to log events");
-
-        eventService = RetrofitInstance.get().create(EventService.class);
-        userId = UserIdProvider.get(this);
 
         googleApiClient = new GoogleApiClient.Builder(this, this, this)
                 .addApi(LocationServices.API)
@@ -106,7 +108,7 @@ public class LogEventService extends Service implements LocationListener, Google
 
         Log.i(TAG, "Storing event " + event.toString() + " to backend.");
 
-        new SaveEventTask().execute(event);
+        sendEventToBackend(event);
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -150,30 +152,18 @@ public class LogEventService extends Service implements LocationListener, Google
         }
     }
 
-    private class SaveEventTask extends AsyncTask<Event, Void, Event> {
+    @Background
+    protected void sendEventToBackend(Event event) {
+        String userId = userIdProvider.get();
 
-        @Override
-        protected Event doInBackground(Event... events) {
-            Event event = events[0];
-            Call<Event> save = eventService.save(userId, event);
-            try {
-                Response<Event> execute = save.execute();
-                if (!execute.isSuccessful()) {
-                    ResponseBody responseBody = execute.errorBody();
-                    Log.e(TAG, "Restoring status from backend failed: " + (responseBody != null ? responseBody.string() : "no info"));
-                }
-                return execute.body();
-            } catch (IOException e) {
-                Log.e(TAG, "Storing event to backend failed: " + e.getMessage(), e);
-                return null;
-            }
-        }
+        try {
+            Response<Event> response = retrofitInstance.getEventService().save(userId, event).execute();
 
-        @Override
-        protected void onPostExecute(Event event) {
-            if (event != null) {
-                Log.i(TAG, "Event successfully stored to backend. Event ID: " + event.getId());
+            if (response.isSuccessful()) {
+                Log.i(TAG, "Event successfully stored to backend. Event ID: " + response.body().getId());
             }
+        } catch (IOException e) {
+            Log.e(TAG, "Storing event to backend failed: " + e.getMessage(), e);
         }
     }
 }

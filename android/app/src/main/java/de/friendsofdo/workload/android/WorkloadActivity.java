@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -15,57 +14,57 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Background;
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.Click;
+import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.UiThread;
+import org.androidannotations.annotations.ViewById;
 
 import java.io.IOException;
 
 import de.friendsofdo.workload.android.api.Event;
 import de.friendsofdo.workload.android.api.RetrofitInstance;
-import de.friendsofdo.workload.android.api.StatusService;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
+import de.friendsofdo.workload.android.api.Status;
 import retrofit2.Response;
 
+@EActivity(R.layout.activity_workload)
 public class WorkloadActivity extends BaseActivity {
 
+    private static final String TAG = "WorkloadActivity";
     private static final int REQUEST_LOCATION = 110;
 
-    private Event.Type currentState;
-    private StatusService statusService;
-    private static final String TAG = "WorkloadActivity";
-    private String userId;
+    @ViewById(R.id.toolbar)
+    protected Toolbar toolbar;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_workload);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    @ViewById(R.id.drawer_layout)
+    protected DrawerLayout drawerLayout;
+
+    @ViewById(R.id.nav_view)
+    protected NavigationView navigationView;
+
+    @Bean
+    protected RetrofitInstance retrofitInstance;
+
+    @Bean
+    protected UserIdProvider userIdProvider;
+
+    private Event.Type currentState;
+
+    @AfterViews
+    protected void setup() {
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                storeEvent();
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        userId = UserIdProvider.get(this);
-        statusService = RetrofitInstance.get().create(StatusService.class);
-
-        new GetStatusFromBackendTask().execute();
 
         Log.i(TAG, "Workload activity created.");
     }
@@ -94,6 +93,7 @@ public class WorkloadActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
 
+        updateCurrentState();
         askForLocationPermissions();
     }
 
@@ -111,8 +111,14 @@ public class WorkloadActivity extends BaseActivity {
         }
     }
 
+    @Click(R.id.fab)
+    protected void clickedFloatingActionButton() {
+        storeEvent();
+    }
+
     private void storeEvent() {
-        Intent serviceIntent = new Intent(getApplicationContext(), LogEventService.class);
+        Intent serviceIntent = new Intent(getApplicationContext(), LogEventService_.class);
+
         if (currentState == Event.Type.IN) {
             serviceIntent.setAction(LogEventService.ACTION_EVENT_OUT);
             currentState = Event.Type.OUT;
@@ -138,34 +144,31 @@ public class WorkloadActivity extends BaseActivity {
         }
     }
 
-    class GetStatusFromBackendTask extends AsyncTask<Void, Void, de.friendsofdo.workload.android.api.Status> {
+    @Background
+    protected void updateCurrentState() {
+        String userId = userIdProvider.get();
 
-        @Override
-        protected de.friendsofdo.workload.android.api.Status doInBackground(Void... voids) {
-            Call<de.friendsofdo.workload.android.api.Status> call = statusService.get(userId);
-            try {
-                Response<de.friendsofdo.workload.android.api.Status> execute = call.execute();
-                if (!execute.isSuccessful()) {
-                    ResponseBody responseBody = execute.errorBody();
-                    Log.e(TAG, "Restoring status from backend failed: " + (responseBody != null ? responseBody.string() : "no info"));
-                }
-                return execute.body();
-            } catch (IOException e) {
-                Log.e(TAG, "Restoring status from backend failed: " + e.getMessage(), e);
-                return null;
-            }
-        }
+        try {
+            Response<Status> call = retrofitInstance.getStatusService().get(userId).execute();
 
-        @Override
-        protected void onPostExecute(de.friendsofdo.workload.android.api.Status status) {
-            if (status != null) {
-                WorkloadActivity.this.currentState = status.isAtWork() ? Event.Type.IN : Event.Type.OUT;
-                Log.i(TAG, "Status successfully restored from backend: " + WorkloadActivity.this.currentState.name());
-            } else {
-                WorkloadActivity.this.currentState = Event.Type.OUT;
-                Log.i(TAG, "Using default status (OUT)");
+            if (call.isSuccessful()) {
+                setStatus(call.body());
             }
-            WorkloadActivity.this.adaptViewToCurrentState();
+
+        } catch (IOException e) {
+            Log.e(TAG, "Restoring status from backend failed: " + e.getMessage(), e);
         }
+    }
+
+    @UiThread
+    protected void setStatus(Status status) {
+        if (status != null) {
+            WorkloadActivity.this.currentState = status.isAtWork() ? Event.Type.IN : Event.Type.OUT;
+            Log.i(TAG, "Status successfully restored from backend: " + WorkloadActivity.this.currentState.name());
+        } else {
+            WorkloadActivity.this.currentState = Event.Type.OUT;
+            Log.i(TAG, "Using default status (OUT)");
+        }
+        WorkloadActivity.this.adaptViewToCurrentState();
     }
 }
