@@ -24,13 +24,28 @@ Workweek
  - list of workdays
  
 # API endpoints
-POST /{userId}/events
+## Events
+`POST    /{userId}/events`
 
-GET /{userId}/events
+`GET     /{userId}/events`
 
-GET /{userId}/workloads/{year}/{weekOfYear}
+`GET     /{userId}/events/{id}`
 
-GET /{userId}/status 
+`DELETE  /{userId}/events/{id}`
+
+## Workloads
+`GET     /{userId}/workloads/{year}/{weekOfYear}`
+
+## Workplaces
+`POST    /{userId}/workplaces`
+
+`GET     /{userId}/workplaces`
+
+`DELETE  /{userId}/workplaces/{id}`
+
+## Status
+`GET     /{userId}/status`
+
 
 # Local Development
 - Create service credentials for AppEngine from Google Cloud Console (JSON) and put it to ${project_root}/backend/workload-service-auth.json
