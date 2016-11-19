@@ -53,7 +53,7 @@ lon          The longitude part of the geo coordinate where the workplace is loc
 ```
 
 # API endpoints
-## Events
+### Events
 `POST    /{userId}/events`
 
 `GET     /{userId}/events`
@@ -62,17 +62,17 @@ lon          The longitude part of the geo coordinate where the workplace is loc
 
 `DELETE  /{userId}/events/{id}`
 
-## Workloads
+### Workloads
 `GET     /{userId}/workloads/{year}/{weekOfYear}`
 
-## Workplaces
+### Workplaces
 `POST    /{userId}/workplaces`
 
 `GET     /{userId}/workplaces`
 
 `DELETE  /{userId}/workplaces/{id}`
 
-## Status
+### Status
 `GET     /{userId}/status`
 
 
