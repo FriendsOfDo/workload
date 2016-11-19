@@ -25,7 +25,7 @@ public class EventController {
         return eventService.list(userId);
     }
 
-    @RequestMapping(path = "/{id}", method = RequestMethod.PUT, produces = "application/json", consumes = "application/json")
+    @RequestMapping(path = "/{id}", method = RequestMethod.GET, produces = "application/json", consumes = "application/json")
     public Event get(@PathVariable("userId") String userId, @PathVariable("id") long id) {
         return eventService.get(id);
     }
