@@ -54,27 +54,29 @@ lon          The longitude part of the geo coordinate where the workplace is loc
 
 # API endpoints
 ### Events
-`POST    /{userId}/events`
-
-`GET     /{userId}/events`
-
-`GET     /{userId}/events/{id}`
-
-`DELETE  /{userId}/events/{id}`
+```
+POST    /{userId}/events
+GET     /{userId}/events
+GET     /{userId}/events/{id}
+DELETE  /{userId}/events/{id}
+```
 
 ### Workloads
-`GET     /{userId}/workloads/{year}/{weekOfYear}`
+```
+GET     /{userId}/workloads/{year}/{weekOfYear}
+```
 
 ### Workplaces
-`POST    /{userId}/workplaces`
-
-`GET     /{userId}/workplaces`
-
-`DELETE  /{userId}/workplaces/{id}`
+```
+POST    /{userId}/workplaces
+GET     /{userId}/workplaces
+DELETE  /{userId}/workplaces/{id}
+```
 
 ### Status
-`GET     /{userId}/status`
-
+```
+GET     /{userId}/status
+```
 
 # Local Development
 - Create service credentials for AppEngine from Google Cloud Console (JSON) and put it to ${project_root}/backend/workload-service-auth.json
