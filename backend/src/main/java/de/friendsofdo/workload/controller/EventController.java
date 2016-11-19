@@ -14,14 +14,24 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
-    @RequestMapping(consumes = "application/json", produces = "application/json", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     public Event save(@PathVariable("userId") String userId, @RequestBody Event event) {
         event.setUserId(userId);
         return eventService.save(event);
     }
 
-    @RequestMapping(produces = "application/json", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     public List<Event> list(@PathVariable("userId") String userId) {
         return eventService.list(userId);
+    }
+
+    @RequestMapping(path = "/{id}", method = RequestMethod.PUT, produces = "application/json", consumes = "application/json")
+    public Event get(@PathVariable("userId") String userId, @PathVariable("id") long id) {
+        return eventService.get(id);
+    }
+
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
+    public void delete(@PathVariable("userId") String userId, @PathVariable("id") long id) {
+        eventService.delete(id);
     }
 }

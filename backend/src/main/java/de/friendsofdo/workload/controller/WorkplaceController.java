@@ -25,7 +25,7 @@ public class WorkplaceController {
         return workplaceService.list(userId);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable("userId") String userId, @PathVariable("id") long id) {
         workplaceService.delete(id);
     }
