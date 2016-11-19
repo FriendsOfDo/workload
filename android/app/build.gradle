@@ -52,5 +52,6 @@ dependencies {
 
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-jackson:2.1.0'
+    compile 'com.github.iweinzierl:android-utils:1.0'
     testCompile 'junit:junit:4.12'
 }
