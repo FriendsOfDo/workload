@@ -1,16 +1,12 @@
 package de.friendsofdo.workload.android;
 
-import android.Manifest;
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -31,13 +27,13 @@ import java.io.IOException;
 import de.friendsofdo.workload.android.api.Event;
 import de.friendsofdo.workload.android.api.RetrofitInstance;
 import de.friendsofdo.workload.android.api.Status;
+import de.friendsofdo.workload.android.helper.PermissionsHelper;
 import retrofit2.Response;
 
 @EActivity(R.layout.activity_workload)
 public class WorkloadActivity extends BaseActivity {
 
     private static final String TAG = "WorkloadActivity";
-    private static final int REQUEST_LOCATION = 110;
 
     @ViewById(R.id.toolbar)
     protected Toolbar toolbar;
@@ -95,23 +91,8 @@ public class WorkloadActivity extends BaseActivity {
         super.onResume();
 
         updateCurrentState();
-        askForLocationPermissions();
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    private void askForLocationPermissions() {
-        boolean coarsePermissions = ContextCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        boolean finePermissions = ContextCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-
-        if (coarsePermissions || finePermissions) {
-            Log.d(TAG, "Location permissions already granted");
-            Intent serviceIntent = new Intent(getApplicationContext(), LogEventService_.class);
-            serviceIntent.setAction(LogEventService.ACTION_OBSERVE_LOCATION_UPDATES);
-            startService(serviceIntent);
-        } else {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+        if (PermissionsHelper.isLocationPermissionsGranted(this) == PermissionsHelper.PermissionType.GRANTED) {
+            startObservingLocationUpdates();
         }
     }
 
@@ -119,16 +100,21 @@ public class WorkloadActivity extends BaseActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == REQUEST_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Intent serviceIntent = new Intent(getApplicationContext(), LogEventService_.class);
-            serviceIntent.setAction(LogEventService.ACTION_OBSERVE_LOCATION_UPDATES);
-            startService(serviceIntent);
+        if (requestCode == PermissionsHelper.REQUEST_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startObservingLocationUpdates();
         }
     }
+
 
     @Click(R.id.fab)
     protected void clickedFloatingActionButton() {
         storeEvent();
+    }
+
+    private void startObservingLocationUpdates() {
+        Intent serviceIntent = new Intent(this, LogEventService_.class);
+        serviceIntent.setAction(LogEventService.ACTION_OBSERVE_LOCATION_UPDATES);
+        startService(serviceIntent);
     }
 
     private void storeEvent() {

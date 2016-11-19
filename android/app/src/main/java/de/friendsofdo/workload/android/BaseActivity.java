@@ -1,5 +1,6 @@
 package de.friendsofdo.workload.android;
 
+import android.content.Intent;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -7,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public abstract  class BaseActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public abstract class BaseActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     @Override
     public void onBackPressed() {
@@ -47,7 +48,7 @@ public abstract  class BaseActivity extends AppCompatActivity implements Navigat
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+            startActivity(new Intent(this, WorkplaceSelectionActivity_.class));
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {

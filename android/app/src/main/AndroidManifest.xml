@@ -12,6 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="TODO_API_KEY"/>
+
         <activity
             android:name=".WorkloadActivity_"
             android:label="@string/app_name"
@@ -22,6 +24,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".WorkplaceSelectionActivity_"/>
 
         <service android:name=".LogEventService_">
             <intent-filter>
