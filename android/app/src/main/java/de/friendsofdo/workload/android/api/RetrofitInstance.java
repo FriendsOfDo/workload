@@ -14,6 +14,7 @@ public class RetrofitInstance {
 
     private EventService eventService;
     private StatusService statusService;
+    private WorkplaceService workplaceService;
 
     @AfterInject
     protected void setup() {
@@ -24,6 +25,7 @@ public class RetrofitInstance {
 
         eventService = retrofit.create(EventService.class);
         statusService = retrofit.create(StatusService.class);
+        workplaceService = retrofit.create(WorkplaceService.class);
     }
 
     public EventService getEventService() {
@@ -32,5 +34,9 @@ public class RetrofitInstance {
 
     public StatusService getStatusService() {
         return statusService;
+    }
+
+    public WorkplaceService getWorkplaceService() {
+        return workplaceService;
     }
 }

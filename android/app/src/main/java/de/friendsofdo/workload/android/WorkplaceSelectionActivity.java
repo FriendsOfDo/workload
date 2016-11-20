@@ -14,6 +14,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
+import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.OptionsMenu;
@@ -23,15 +24,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.friendsofdo.workload.android.api.RetrofitInstance;
 import de.friendsofdo.workload.android.api.Workplace;
 import de.friendsofdo.workload.android.dialog.WorkplaceSaveDialog;
 import de.friendsofdo.workload.android.helper.PermissionsHelper;
+import retrofit2.Call;
+import retrofit2.Response;
 
 @EActivity
 @OptionsMenu({R.menu.activity_workplace_selection})
 public class WorkplaceSelectionActivity extends AbstractMapActivity implements GoogleMap.OnMapClickListener, SeekBar.OnSeekBarChangeListener {
 
     private static final String TAG = "WorkplaceSelection";
+
+    @Bean
+    protected RetrofitInstance retrofitInstance;
+
+    @Bean
+    protected UserIdProvider userIdProvider;
 
     @ViewById(R.id.radiusView)
     protected SeekBar radiusView;
@@ -139,7 +149,20 @@ public class WorkplaceSelectionActivity extends AbstractMapActivity implements G
     @Background
     public void saveWorkplace(Workplace workplace) {
         Log.i(TAG, "Send workplace to backend: " + workplace.toString());
-        // TODO
+        Call<Workplace> call = retrofitInstance.getWorkplaceService().save(userIdProvider.get(), workplace);
+
+        try {
+            Response<Workplace> response = call.execute();
+            if (response.isSuccessful()) {
+                Workplace savedWorkplace = response.body();
+                Log.i(TAG, "Successfully saved workplace: " + savedWorkplace.getId());
+                finish();
+            } else {
+                Log.w(TAG, "Failed saving workplace (Http " + response.code() + ")");
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to save workplace", e);
+        }
     }
 
     @Override

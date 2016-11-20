@@ -1,5 +1,10 @@
 package de.friendsofdo.workload.android.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Workplace {
 
     private long id;
@@ -14,17 +19,6 @@ public class Workplace {
     private double lat;
     private double lon;
     private int radius;
-
-    private Workplace(Builder builder) {
-        setUserId(builder.userId);
-        setName(builder.name);
-        setStreet(builder.street);
-        setCity(builder.city);
-        setPostcode(builder.postcode);
-        setLat(builder.lat);
-        setLon(builder.lon);
-        setRadius(builder.radius);
-    }
 
     public long getId() {
         return id;
@@ -168,7 +162,16 @@ public class Workplace {
         }
 
         public Workplace build() {
-            return new Workplace(this);
+            Workplace workplace = new Workplace();
+            workplace.setUserId(userId);
+            workplace.setName(name);
+            workplace.setStreet(street);
+            workplace.setCity(city);
+            workplace.setPostcode(postcode);
+            workplace.setLat(lat);
+            workplace.setLon(lon);
+            workplace.setRadius(radius);
+            return workplace;
         }
     }
 }
